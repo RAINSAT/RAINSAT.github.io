@@ -1,0 +1,42 @@
+.header {
+    background-color: #24292e;
+}
+
+.git_head {
+    float: left;
+}
+
+.git_head img {
+    width: 45px;
+    height: 45px;
+    margin-left: 335px;
+    margin-top: auto;
+}
+
+.git_nav {
+    height: 45px;
+}
+
+.git_nav nav {
+    width: 1200px;
+    margin: 0 auto;
+}
+
+.git_nav .git_nav_ul {
+    list-style: none;
+}
+
+.git_nav_uli {
+    float: left;
+    margin-right: 20px;
+    height: 45px;
+    line-height: 45px;
+}
+
+.git_nav .git_nav_ul .git_nav_uli a {
+    text-decoration: none;
+}
+
+.on {
+    color: rgba(20, 70, 235, 0.507);
+}
