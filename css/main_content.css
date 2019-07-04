@@ -40,3 +40,35 @@
 .on {
     color: rgba(20, 70, 235, 0.507);
 }
+
+.slider_wrapper {
+    margin-top: 10px;
+}
+
+.slider_wrapper #shadow {
+    position: absolute;
+    z-index: 200;
+    right: 10px;
+    bottom: 12px;
+}
+
+
+.slider_wrapper .left {
+    background-color: #fff;
+    position: relative;
+    float: left;
+}
+
+
+.slider_wrapper .right {
+    float: right;
+}
+
+.content_wrapper {
+    width: 1300px;
+    margin: 0 auto;
+}
+
+.current {
+    background: #03a8b1;
+}

@@ -8,3 +8,8 @@ span {
     font-size: 16px;
     color: #fff;
 }
+
+.slider_wrapper .shadow i {
+    display: none;
+    font-style: normal;
+}
