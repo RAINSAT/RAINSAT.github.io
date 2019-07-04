@@ -41,7 +41,7 @@ $(function () {
     $("#firstpage").attr("href", "https://github.com/" + rs.username);
     $("#repo").attr("href", "https://github.com/" + rs.username + "?tab=repositories");
     $("#star").attr("href", "https://github.com/" + rs.username + "?tab=stars");
-    $("#blog").attr("href", "./blog/blog.html/");
+    $("#blog").attr("href", "./blog/blog.html");
 })
 
 slider.run();
