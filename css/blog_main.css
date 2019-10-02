@@ -301,7 +301,7 @@
 }
 .main_article .main_left .article .category{
     background-color: rgba(243, 112, 120,0.8);
-    position:absolute;
+    /*position:absolute;*/
     left:-1px;top:-1px;
     border-top-left-radius:3px;
     min-width:50px;
