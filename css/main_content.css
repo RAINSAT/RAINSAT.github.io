@@ -1,6 +1,10 @@
 .header {
     background-color: #24292e;
 }
+#wp{
+    width: 1200px;
+    margin: 0px auto;
+}
 
 .git_head {
     float: left;
@@ -71,23 +75,37 @@
     bottom: 12px;
 }
 
+.content_wrapper {
+    width: 1300px;
+    margin: 0 auto;
+    overflow: hidden;
+}
 
-.slider_wrapper .left {
+.slider_wrapper .content_wrapper .left {
     background-color: #fff;
     position: relative;
     float: left;
 }
 
 
-.slider_wrapper .right {
+.slider_wrapper .content_wrapper .right {
     float: right;
-}
-
-.content_wrapper {
-    width: 1300px;
-    margin: 0 auto;
+    position: relative;
 }
 
 .current {
     background: #03a8b1;
 }
+
+.category{
+    width: 1200px;
+    margin: 10px auto;
+}
+
+.category .title
+{
+    color: #03a8b1;
+    font-size: 24px;
+    font-family: Arial;
+}
+

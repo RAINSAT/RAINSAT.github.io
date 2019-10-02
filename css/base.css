@@ -1,0 +1,206 @@
+/**
+* 七空幻音,通用CSS
+* @Author: 幻音丶小涛
+* @Time: 2016年10月18日20:20:21
+*/
+
+
+html,body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,button,textarea,p,blockquote,th,td,div
+{
+    margin:0;
+    padding:0;
+    font-family:Consolas, Microsoft YaHei, Helvetica Neue, Helvetica, Arial, sans-serif;
+    color: #222;
+    font-size: 12px;
+    outline: none;
+    /*-webkit-user-select: none;*/
+    /*-moz-user-select: none;*/
+    /*-ms-user-select: none;*/
+    /*user-select: none;*/
+}
+
+*::selection {
+    color: #48aec4;
+    background: #DCDCDC;
+}
+
+*::-moz-selection {
+    color: #48aec4;
+    background: #DCDCDC;
+}
+
+img {
+    border: none;
+}
+
+a {
+    text-decoration: none;
+}
+input[type=button],input[type=submit],label,select,option,.pointer{
+}
+em {
+    font-style: normal;
+}
+
+body {
+
+}
+
+html {
+
+}
+
+li {
+    list-style-type: none;
+}
+@font-face {
+    font-family: 'iconfont';  /* project id："163618" */
+    src: url('//at.alicdn.com/t/font_1y3vf8f14y722o6r.eot');
+    src: url('//at.alicdn.com/t/font_1y3vf8f14y722o6r.eot') format('embedded-opentype'),
+    url('//at.alicdn.com/t/font_1y3vf8f14y722o6r.woff') format('woff'),
+    url('//at.alicdn.com/t/font_1y3vf8f14y722o6r.ttf') format('truetype'),
+    url('//at.alicdn.com/t/font_1y3vf8f14y722o6r.svg#iconfont') format('svg');
+}
+#validatechange{
+    cursor:pointer;
+}
+::-webkit-scrollbar
+{
+    width: 4px;
+    height: 4px;
+}
+::-webkit-scrollbar-track-piece
+{
+    background-color: #eee;
+}
+::-webkit-scrollbar-thumb:vertical
+{
+    height: 5px;
+    background-color: #9e9e9e;
+    -webkit-border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:horizontal
+{
+    width: 5px;
+    background-color: #eee;
+    -webkit-border-radius: 6px;
+}
+body{
+
+}
+/*account level*/
+.lv1,.lv2,.lv3,.lv4,.lv5,.lv6,.lv7,.lv8{
+    background:url("../images/level.png") no-repeat;
+    display:inline-block;
+    width:28px;
+    height:16px;
+}
+.lv1{
+    background-position:0 0;
+}
+.lv2{
+    background-position:0 -15px;
+}
+.lv3{
+    background-position:0 -30px;
+}
+.lv4{
+    background-position:0 -45px;
+}
+.lv5{
+    background-position:0 -60px;
+}
+.lv6{
+    background-position:0 -75px;
+}
+.lv7{
+    background-position:0 -90px;
+}
+.lv8{
+    background-position:0 -105px;
+}
+.xt-icon{
+    font-family:'iconfont';
+    font-style:  normal;
+}
+.xt-icon-email:before{
+    content: '\e602';
+}
+.xt-icon-user:before{
+    content: '\e617';
+}
+.xt-icon-space:before{
+    content: '\e618';
+}
+.xt-icon-exit:before{
+    content: '\e66c';
+}
+.xt-icon-article:before{
+    content: '\e614';
+}
+.xt-icon-setting:before{
+    content: '\e604';
+}
+.xt-icon-search:before{
+    content: '\e601';
+}
+.xt-icon-top:before{
+    content: '\e60f';
+}
+.xt-icon-bottom:before{
+    content: '\e60e';
+}
+.xt-icon-left:before{
+    content: '\e609';
+}
+.xt-icon-view:before{
+    content: '\e60c';
+}
+.xt-icon-right:before{
+    content: '\e616';
+}
+.xt-icon-right2:before{
+    content: '\e619';
+}
+.xt-icon-link:before{
+    content: '\e612';
+}
+.xt-icon-public:before{
+    content: '\e61b';
+}
+.xt-icon-comment:before{
+    content: '\e607';
+}
+.xt-icon-yl:before{
+    content:'\e61a';
+}
+.xt-icon-yr:before{
+    content:'\e61c';
+}
+.xt-icon-time:before{
+    content: '\e60b';
+}
+.xt-line1 {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    overflow: hidden;
+}
+.xt-line2 {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+}
+.xt-line3 {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+}
+.xt-line4 {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    overflow: hidden;
+}
