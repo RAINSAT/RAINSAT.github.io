@@ -8,6 +8,7 @@
 
 .git_head {
     float: left;
+    margin-right: 20px;
 }
 
 .git_head img {
