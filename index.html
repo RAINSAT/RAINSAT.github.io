@@ -247,6 +247,149 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/06/07/std_enable_if/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zhangyxin">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="zhangyxin coder">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2020/06/07/std_enable_if/" itemprop="url">
+                  std_enable_if
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-07T10:42:53+08:00">
+                2020-06-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="std-enable-if"><a href="#std-enable-if" class="headerlink" title="std::enable_if"></a>std::enable_if</h2><blockquote>
+<p>SFINAE是英文Substitution failure is not an error的缩写，意思是匹配失败不是错误。这句话什么意思呢？当调用模板函数时编译器会根据传入参数推导最合适的模板函数，在这个推导过程中如果某一个或者某几个模板函数推导出来是编译无法通过的，只要有一个可以正确推导出来，那么那几个推导得到的可能产生编译错误的模板函数并不会引发编译错误</p>
+</blockquote>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">Test</span> &#123;</span></span><br><span class="line">    <span class="keyword">typedef</span> <span class="keyword">int</span> foo;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt; </span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">(<span class="keyword">typename</span> T::foo)</span> </span>&#123;&#125; <span class="comment">// Definition #1</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt; </span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">(T)</span> </span>&#123;&#125;               <span class="comment">// Definition #2</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    f&lt;Test&gt;(<span class="number">10</span>); <span class="comment">// Call #1.</span></span><br><span class="line">    f&lt;<span class="keyword">int</span>&gt;(<span class="number">10</span>);  <span class="comment">// Call #2. Without error (even though there is no int::foo) thanks to SFINAE.</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>这是wiki上SFINAE的一个经典示例，注释已经解释的相当明白，由于推导模板函数过程中可以找到一个正确的版本，所以即时int::foo是一个语法错误，但是编译器也不会报错。这就是SFINAE要义。在C++11中，标准确立了这种编译的行为，而不像C++98未明确定义它的行为。通过std::enable_if和SFINAE的共同使用，会产生很多很奇妙的实现，STL库中大量的应用了这种组合，下面我们来看看他们组合一起是如何工作的。</p>
+</blockquote>
+<blockquote>
+<p>一个普通版本的模板类定义，一个偏特化版本的模板类定义。它在第一个模板参数为false的时候并不会定义type，只有在第一模板参数为true的时候才会定义type。看一下下面的模板实例化代码</p>
+</blockquote>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typename</span> <span class="built_in">std</span>::enable_if&lt;<span class="literal">true</span>, <span class="keyword">int</span>&gt;::type t; <span class="comment">//正确</span></span><br><span class="line"><span class="keyword">typename</span> <span class="built_in">std</span>::enable_if&lt;<span class="literal">true</span>&gt;::type;        <span class="comment">//可以通过编译，没有实际用处，推导的模板是偏特化版本，第一模板参数是true，第二模板参数是通常版本中定义的默认类型即void</span></span><br><span class="line"><span class="keyword">typename</span> <span class="built_in">std</span>::enable_if&lt;<span class="literal">false</span>&gt;::type;       <span class="comment">//无法通过编译，type类型没有定义</span></span><br><span class="line"><span class="keyword">typename</span> <span class="built_in">std</span>::enable_if&lt;<span class="literal">false</span>, <span class="keyword">int</span>&gt;::type t2; <span class="comment">//同上</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>我们可以看到，通过typename std::enable_if<bool>::type这样传入一个bool值，就能推导出这个type是不是未定义的。那么这种用法有什么用途呢？结合上面的SFINAE来看代码</p>
+</blockquote>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="keyword">typename</span> <span class="built_in">std</span>::enable_if&lt;<span class="built_in">std</span>::is_trivial&lt;T&gt;::value&gt;::<span class="function">type <span class="title">SFINAE_test</span><span class="params">(T value)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">cout</span>&lt;&lt;<span class="string">"T is trival"</span>&lt;&lt;<span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="keyword">typename</span> <span class="built_in">std</span>::enable_if&lt;!<span class="built_in">std</span>::is_trivial&lt;T&gt;::value&gt;::<span class="function">type <span class="title">SFINAE_test</span><span class="params">(T value)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">cout</span>&lt;&lt;<span class="string">"T is none trival"</span>&lt;&lt;<span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">&#125;</span><br><span class="line">SFINAE_test(<span class="built_in">std</span>::<span class="built_in">string</span>(<span class="string">"123"</span>));</span><br><span class="line">SFINAE_test(<span class="number">123</span>);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>这两个函数如果是普通函数的话，根据重载的规则是不会通过编译的。即便是模板函数，如果这两个函数都能推导出正确的结果，也会产生重载二义性问题，但是正因为std::enable_if的运用使这两个函数的返回值在同一个函数调用的推导过程中只有一个合法，遵循SFINAE原则，则可以顺利通过编译。</p>
+</blockquote>
+<blockquote>
+<p>当第一个函数调用进行模板函数推导的时候，第一个版本的模板函数std::is_trivial<T>::value为false，继而std::enable_if&lt;std::is_trivial<T>::value&gt;::type这个类型未定义，不能正确推导，编译器区寻找下一个可能的实现，所以接下来找到第二个模板函数，!std::is_trivial<T>::value的值是true，继而std::enable_if&lt;std::is_trivial<T>::value&gt;::type是void类型，推导成功。这时候SFINAE_test(std::string(“123”));调用有了唯一确定的推导，即第二个模板函数，所以程序打印T is none trival。与此相似的过程，第二个函数调用打印出T is trival。<br>这样写的好处是什么？这个例子中可以认为我们利用SFINAE特性实现了通过不同返回值，相同函数参数进行了函数重载，这样代码看起来更统一一些。还有一些其他应用std::enable_if的方式，比如在模板参数列表里，在函数参数列表里，都是利用SFINAE特性来实现某一些函数的选择推导。来看一下cpprefrence上的例子代码</p>
+</blockquote>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;type_traits&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string&gt;</span></span></span><br><span class="line"> </span><br><span class="line"><span class="keyword">namespace</span> detail &#123; <span class="class"><span class="keyword">struct</span> <span class="title">inplace_t</span>&#123;</span>&#125;; &#125;</span><br><span class="line"><span class="function"><span class="keyword">void</span>* <span class="keyword">operator</span> <span class="title">new</span><span class="params">(<span class="built_in">std</span>::<span class="keyword">size_t</span>, <span class="keyword">void</span>* p, detail::<span class="keyword">inplace_t</span>)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> p;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="comment">// enabled via the return type</span></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="class"><span class="keyword">class</span> <span class="title">T</span>,<span class="title">class</span>... <span class="title">Args</span>&gt;</span></span><br><span class="line"><span class="class"><span class="title">typename</span> <span class="title">std</span>:</span>:enable_if&lt;<span class="built_in">std</span>::is_trivially_constructible&lt;T,Args&amp;&amp;...&gt;::value&gt;::type </span><br><span class="line">    construct(T* t,Args&amp;&amp;... args) </span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; <span class="string">"constructing trivially constructible T\n"</span>;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="comment">// enabled via a parameter</span></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="class"><span class="keyword">class</span> <span class="title">T</span>&gt;</span></span><br><span class="line"><span class="class"><span class="title">void</span> <span class="title">destroy</span>(<span class="title">T</span>* <span class="title">t</span>, </span></span><br><span class="line"><span class="class">             <span class="title">typename</span> <span class="title">std</span>:</span>:enable_if&lt;<span class="built_in">std</span>::is_trivially_destructible&lt;T&gt;::value&gt;::type* = <span class="number">0</span>) </span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; <span class="string">"destroying trivially destructible T\n"</span>;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="comment">// enabled via a template parameter</span></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="class"><span class="keyword">class</span> <span class="title">T</span>,</span></span><br><span class="line"><span class="class">         <span class="title">typename</span> <span class="title">std</span>:</span>:enable_if&lt;</span><br><span class="line">             !<span class="built_in">std</span>::is_trivially_destructible&lt;T&gt;&#123;&#125; &amp;&amp;</span><br><span class="line">             (<span class="built_in">std</span>::is_class&lt;T&gt;&#123;&#125; || <span class="built_in">std</span>::is_union&lt;T&gt;&#123;&#125;),</span><br><span class="line">            <span class="keyword">int</span>&gt;::type = <span class="number">0</span>&gt;</span><br><span class="line"><span class="keyword">void</span> destroy(T* t)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; <span class="string">"destroying non-trivially destructible T\n"</span>;</span><br><span class="line">    t-&gt;~T();</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">std</span>::<span class="keyword">aligned_union_t</span>&lt;<span class="number">0</span>,<span class="keyword">int</span>,<span class="built_in">std</span>::<span class="built_in">string</span>&gt; u;</span><br><span class="line"> </span><br><span class="line">    construct(<span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">int</span>*&gt;(&amp;u));</span><br><span class="line">    destroy(<span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">int</span>*&gt;(&amp;u));</span><br><span class="line"> </span><br><span class="line">    construct(<span class="keyword">reinterpret_cast</span>&lt;<span class="built_in">std</span>::<span class="built_in">string</span>*&gt;(&amp;u),<span class="string">"Hello"</span>);</span><br><span class="line">    destroy(<span class="keyword">reinterpret_cast</span>&lt;<span class="built_in">std</span>::<span class="built_in">string</span>*&gt;(&amp;u));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/27/std_string_wstring/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -797,7 +940,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-count">5</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
