@@ -352,7 +352,7 @@
 <p>任何TCP的实现都需要为MSL选择一个合适的值, RFC的建议值是2分钟。分组可能出现迷途，若迷途分组在MSL中找到路， 造成重复，TCP必须修复</p>
 <p><code>TIME_WAIT</code>存在的理由:</p>
 <ol>
-<li><p>可靠的实现全双工的连接和终止<br> 考虑最终<code>ACK</code>丢失的情况,</p>
+<li><p><strong>可靠的实现全双工的连接和终止</strong><br> 考虑最终<code>ACK</code>丢失的情况,</p>
 </li>
 <li><p><strong>允许老的重复分组在网络中消逝</strong></p>
 <p>TCP的化生身现象, 因为<code>TIME_WAIT</code>的时间是2MSL, 故<code>TIME_WAIT</code>可以确保先前化身(incarnation)的老重复分组都已经在网络中消失了</p>
@@ -362,12 +362,13 @@
 </li>
 </ol>
 <h3 id="SCTP"><a href="#SCTP" class="headerlink" title="SCTP"></a>SCTP</h3><p><strong>连接</strong>: 类似TCP, 但是是四路握手, 主要差别在于作为SCTP整体的一部分的cookie的生成<br><strong>终止</strong>: 不允许”半关闭”</p>
-<p><a href="https://img2018.cnblogs.com/blog/1943986/202002/1943986-20200218135638744-731738588.png" target="_blank" rel="noopener"><img src="https://img2018.cnblogs.com/blog/1943986/202002/1943986-20200218135638744-731738588.png" alt="img"></a><a href="https://img2018.cnblogs.com/blog/1943986/202002/1943986-20200218135715022-27389800.png" target="_blank" rel="noopener"><img src="....%5Clinux%5Cres%5Clinux14.png" alt="img"></a></p>
+<p>[<img src="https://img2018.cnblogs.com/blog/1943986/202002/1943986-20200218135638744-731738588.png" alt="img"></p>
+<p><a href="https://img2018.cnblogs.com/blog/1943986/202002/1943986-20200218135715022-27389800.png" target="_blank" rel="noopener"><img src="....%5Clinux%5Cres%5Clinux14.png" alt="img"></a></p>
 <p>连接和终止</p>
 <h3 id="函数细节补充"><a href="#函数细节补充" class="headerlink" title="函数细节补充"></a>函数细节补充</h3><ul>
 <li><p><code>inet_pton</code> and <code>inet_ntop</code></p>
 <p> inet_addr已经被废弃了, inet_aton其实也不太好, 新的代码应该要使用<code>inet_pton</code> and <code>inet_ntop</code>, 例如如下例子</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Copystruct sockaddr_in <span class="title">makeAddr</span><span class="params">(<span class="keyword">char</span> <span class="keyword">const</span> *addr, <span class="keyword">uint16_t</span> port)</span> </span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> <span class="title">ret</span>&#123;</span>&#125;;</span><br><span class="line">  inet_pton(AF_INET, addr, &amp;ret.sin_addr.s_addr);</span><br><span class="line">  <span class="comment">// ret.sin_addr.s_addr = inet_addr(addr); 例如用上面哪行代码代替此行</span></span><br><span class="line">  ret.sin_family = AF_INET;</span><br><span class="line">  ret.sin_port = htons(port);</span><br><span class="line">  bzero(&amp;ret.sin_zero, <span class="number">8</span>)</span><br><span class="line">  <span class="keyword">return</span> ret;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">struct sockaddr_in <span class="title">makeAddr</span><span class="params">(<span class="keyword">char</span> <span class="keyword">const</span> *addr, <span class="keyword">uint16_t</span> port)</span> </span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> <span class="title">ret</span>&#123;</span>&#125;;</span><br><span class="line">  inet_pton(AF_INET, addr, &amp;ret.sin_addr.s_addr);</span><br><span class="line">  <span class="comment">// ret.sin_addr.s_addr = inet_addr(addr); 例如用上面哪行代码代替此行</span></span><br><span class="line">  ret.sin_family = AF_INET;</span><br><span class="line">  ret.sin_port = htons(port);</span><br><span class="line">  bzero(&amp;ret.sin_zero, <span class="number">8</span>)</span><br><span class="line">  <span class="keyword">return</span> ret;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 
 
@@ -400,10 +401,16 @@
 <p><a href="https://img2018.cnblogs.com/blog/1943986/202002/1943986-20200218135741884-638091161.png" target="_blank" rel="noopener"><img src="https://img2018.cnblogs.com/blog/1943986/202002/1943986-20200218135741884-638091161.png" alt="img"></a></p>
 <p>如何处理这种问题依赖于不同的实现, 之后再说</p>
 <h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>  所有客户端和服务器都从调用socket开始, 客户端connect, 服务端bind, listen和accept, 大多数TCP都是并发的, 而大多数UDP却是迭代的</p>
-<h2 id="IO复用-–-select-和-poll"><a href="#IO复用-–-select-和-poll" class="headerlink" title="IO复用 – select 和 poll"></a>IO复用 – select 和 poll</h2><p>- 当用户处理多个 描述符, 必须使用IO复用</p>
-<p>- 如果一个TCP服务器, 既要处理监听的套接字, 又要处理连接的套接字, 就要使用IO复用</p>
-<p>- 如果又要TCP, 又要UDP, 就要IO复用</p>
-<p>- 如果一个服务器要处理多个服务器和多个协议, 通常要IO复用(例如inetd守护进程)</p>
+<h2 id="IO复用-–-select-和-poll"><a href="#IO复用-–-select-和-poll" class="headerlink" title="IO复用 – select 和 poll"></a>IO复用 – select 和 poll</h2><ul>
+<li><p>当用户处理多个 描述符, 必须使用IO复用</p>
+</li>
+<li><p>如果一个TCP服务器, 既要处理监听的套接字, 又要处理连接的套接字, 就要使用IO复用</p>
+</li>
+<li><p>如果又要TCP, 又要UDP, 就要IO复用</p>
+</li>
+<li><p>如果一个服务器要处理多个服务器和多个协议, 通常要IO复用(例如inetd守护进程)</p>
+</li>
+</ul>
 <p>IO复用并非只局限于网络编程, 许多重要的应用也要采用这个技术</p>
 <h3 id="IO模型"><a href="#IO模型" class="headerlink" title="IO模型"></a>IO模型</h3><p>在了解IO复用之前需要先回顾unix的5种IO模型: 阻塞式, 非阻塞式, 复用, 信号驱动IO, 异步IO</p>
 <p>其中</p>
