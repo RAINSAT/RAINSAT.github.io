@@ -1,0 +1,838 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="网络," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="传输层部分知识点TIME_WAIT状态 MSL: maximum segment lifetime  任何TCP的实现都需要为MSL选择一个合适的值, RFC的建议值是2分钟。分组可能出现迷途，若迷途分组在MSL中找到路， 造成重复，TCP必须修复 TIME_WAIT存在的理由:  可靠的实现全双工的连接和终止 考虑最终ACK丢失的情况,  允许老的重复分组在网络中消逝 TCP的化生身现象, 因为">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Unix网络编程">
+<meta property="og:url" content="http://yoursite.com/2020/07/14/Unix%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/index.html">
+<meta property="og:site_name" content="zhangyxin coder">
+<meta property="og:description" content="传输层部分知识点TIME_WAIT状态 MSL: maximum segment lifetime  任何TCP的实现都需要为MSL选择一个合适的值, RFC的建议值是2分钟。分组可能出现迷途，若迷途分组在MSL中找到路， 造成重复，TCP必须修复 TIME_WAIT存在的理由:  可靠的实现全双工的连接和终止 考虑最终ACK丢失的情况,  允许老的重复分组在网络中消逝 TCP的化生身现象, 因为">
+<meta property="og:image" content="https://img2018.cnblogs.com/blog/1943986/202002/1943986-20200218135638744-731738588.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/14/Unix%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/....%5Clinux%5Cres%5Clinux14.png">
+<meta property="og:image" content="https://img2018.cnblogs.com/blog/1943986/202002/1943986-20200218135741884-638091161.png">
+<meta property="og:image" content="https://img2018.cnblogs.com/blog/1943986/202002/1943986-20200220171334267-15911015.png">
+<meta property="og:image" content="https://img2018.cnblogs.com/blog/1943986/202002/1943986-20200220171402749-1733523648.png">
+<meta property="article:published_time" content="2020-07-14T12:20:17.000Z">
+<meta property="article:modified_time" content="2020-07-14T13:16:23.597Z">
+<meta property="article:author" content="zhangyxin">
+<meta property="article:tag" content="网络">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img2018.cnblogs.com/blog/1943986/202002/1943986-20200218135638744-731738588.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/07/14/Unix网络编程/"/>
+
+
+
+
+
+  <title> Unix网络编程 | zhangyxin coder </title>
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">zhangyxin coder</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/07/14/Unix%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zhangyxin">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="zhangyxin coder">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Unix网络编程
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-07-14T20:20:17+08:00">
+                2020-07-14
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C%E5%8D%8F%E8%AE%AE/" itemprop="url" rel="index">
+                    <span itemprop="name">网络协议</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="传输层部分知识点"><a href="#传输层部分知识点" class="headerlink" title="传输层部分知识点"></a>传输层部分知识点</h2><h3 id="TIME-WAIT状态"><a href="#TIME-WAIT状态" class="headerlink" title="TIME_WAIT状态"></a>TIME_WAIT状态</h3><ul>
+<li>MSL: maximum segment lifetime</li>
+</ul>
+<p>任何TCP的实现都需要为MSL选择一个合适的值, RFC的建议值是2分钟。分组可能出现迷途，若迷途分组在MSL中找到路， 造成重复，TCP必须修复</p>
+<p><code>TIME_WAIT</code>存在的理由:</p>
+<ol>
+<li><p>可靠的实现全双工的连接和终止<br> 考虑最终<code>ACK</code>丢失的情况,</p>
+</li>
+<li><p><strong>允许老的重复分组在网络中消逝</strong></p>
+<p>TCP的化生身现象, 因为<code>TIME_WAIT</code>的时间是2MSL, 故<code>TIME_WAIT</code>可以确保先前化身(incarnation)的老重复分组都已经在网络中消失了</p>
+<blockquote>
+<p>不过存在一个例外: 如果到达的SYN的序列号大于前一化身的结束序列号,源自Berkely的实现应该给当前<strong>`</strong>TIME_WAIT<strong>`</strong>状态的连接启动新的化身</p>
+</blockquote>
+</li>
+</ol>
+<h3 id="SCTP"><a href="#SCTP" class="headerlink" title="SCTP"></a>SCTP</h3><p><strong>连接</strong>: 类似TCP, 但是是四路握手, 主要差别在于作为SCTP整体的一部分的cookie的生成<br><strong>终止</strong>: 不允许”半关闭”</p>
+<p><a href="https://img2018.cnblogs.com/blog/1943986/202002/1943986-20200218135638744-731738588.png" target="_blank" rel="noopener"><img src="https://img2018.cnblogs.com/blog/1943986/202002/1943986-20200218135638744-731738588.png" alt="img"></a><a href="https://img2018.cnblogs.com/blog/1943986/202002/1943986-20200218135715022-27389800.png" target="_blank" rel="noopener"><img src="....%5Clinux%5Cres%5Clinux14.png" alt="img"></a></p>
+<p>连接和终止</p>
+<h3 id="函数细节补充"><a href="#函数细节补充" class="headerlink" title="函数细节补充"></a>函数细节补充</h3><ul>
+<li><p><code>inet_pton</code> and <code>inet_ntop</code></p>
+<p> inet_addr已经被废弃了, inet_aton其实也不太好, 新的代码应该要使用<code>inet_pton</code> and <code>inet_ntop</code>, 例如如下例子</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Copystruct sockaddr_in <span class="title">makeAddr</span><span class="params">(<span class="keyword">char</span> <span class="keyword">const</span> *addr, <span class="keyword">uint16_t</span> port)</span> </span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> <span class="title">ret</span>&#123;</span>&#125;;</span><br><span class="line">  inet_pton(AF_INET, addr, &amp;ret.sin_addr.s_addr);</span><br><span class="line">  <span class="comment">// ret.sin_addr.s_addr = inet_addr(addr); 例如用上面哪行代码代替此行</span></span><br><span class="line">  ret.sin_family = AF_INET;</span><br><span class="line">  ret.sin_port = htons(port);</span><br><span class="line">  bzero(&amp;ret.sin_zero, <span class="number">8</span>)</span><br><span class="line">  <span class="keyword">return</span> ret;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+</li>
+</ul>
+<ul>
+<li><p><code>listen</code>的作用</p>
+<p>  刚由<code>socket</code>创建的套接字, 系统默认其为主动套接字, <code>listen</code>的作用是把一个未连接的主动套接字转换为被动套接字. 第二个参数是内核为相应的socket排队的最大排队数 (incomplete connection queue: 处于<code>SYN_RCVD</code>状态)<br>     在linux 中，半连接队列的长度是由 /proc/sys/net/core/somaxconn（默认值 128） 与 backlog  tcp_max_syn_backlog 之间的最小值决定的。</p>
+</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /proc/sys/net/core/somaxconn 			//128</span><br></pre></td></tr></table></figure>
+
+
+
+
+<h3 id="并发服务器的一个细节"><a href="#并发服务器的一个细节" class="headerlink" title="并发服务器的一个细节"></a>并发服务器的一个细节</h3><p>考虑如下代码</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">detail</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">pid_t</span> pid;</span><br><span class="line">  <span class="keyword">int</span> listenfd, connfd;</span><br><span class="line"></span><br><span class="line">  listenfd = socket(AF_INET, SOCK_STREAM, <span class="number">0</span>);</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> <span class="title">addr</span> = <span class="title">makeAddr</span>();</span></span><br><span class="line">  bind(listenfd, (sockaddr *)addr, <span class="keyword">sizeof</span>(struct sockaddr_in));</span><br><span class="line"></span><br><span class="line">  <span class="built_in">listen</span>(listenfd, <span class="number">128</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">while</span>(<span class="literal">true</span>) &#123;</span><br><span class="line"></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> <span class="title">clientAddr</span>;</span></span><br><span class="line"></span><br><span class="line">	 <span class="keyword">socklen_t</span> addrlen = <span class="keyword">sizeof</span>(struct sockaddr);</span><br><span class="line"></span><br><span class="line">	 connfd = accept(listenfd, (sockaddr_in) &amp;clientAddr, &amp;addrlen);</span><br><span class="line"></span><br><span class="line">	 <span class="keyword">if</span>(pid = fork()) &#123;</span><br><span class="line"></span><br><span class="line">		<span class="built_in">close</span>(listenfd);</span><br><span class="line">		 <span class="comment">// do something here</span></span><br><span class="line">		 <span class="built_in">close</span>(connfd);</span><br><span class="line">		 <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="built_in">close</span>(connfd); <span class="comment">//注意这里</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>我们知道, TCP套接口字调用close会导致发送一个FIN, 然后会连接终止, 为什么这里不会呢?</strong></p>
+<p>  事实上, 每个文件或socket都会有一个引用计数(引用计数在文件表项中维护), fork的时候会让计数*2, 而close让计数-1, 所以不会出现问题, 真正socket的清理和资源的释放过程要等计数为0的时候才会发生</p>
+<p>  注意, 如果一直fork了也不close, 那么会耗尽所有可用的文件描述符, 导致连接一直打开着</p>
+<p>  如果我们确实想要某个TCP连接上发送一个FIN, 那么我们可以改用shutdown函数.</p>
+<h3 id="处理被中断的系统调用"><a href="#处理被中断的系统调用" class="headerlink" title="处理被中断的系统调用"></a>处理被中断的系统调用</h3><p>  如<code>accept</code>, 是一个慢系统调用, 多数网络支持函数都属于这个类型. 当阻塞于慢系统调用的一个进程捕获某个信号且进入相应的处理函数的时候, 该系统调用可能返回一个<code>EINTR</code>错误.(有的内核自动重启某些被中断的系统调用), <strong>不过为了便于移植</strong>, 我们必须对<code>EINTR</code>有所准备, 一个处理办法就是</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span>(<span class="literal">true</span>) &#123;</span><br><span class="line">  connfd = accept(listenfd, (sockaddr_in) &amp;clientAddr, &amp;addrlen);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>(connfd &lt; <span class="number">0</span>) &#123;</span><br><span class="line">	 <span class="keyword">if</span>(errno == EINTR)</span><br><span class="line">			<span class="keyword">continue</span>;</span><br><span class="line">	 <span class="keyword">else</span> perror(<span class="string">"accept"</span>);</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>注意</strong>: 有一个函数我们不能这样处理, 就是<code>connect</code>, 如果他出了<code>EINTR</code>, 再次调用会立即返回一个错误, 我们必须用<code>select</code>函数来等待连接完成</p>
+<h3 id="处理accept返回前连接终止"><a href="#处理accept返回前连接终止" class="headerlink" title="处理accept返回前连接终止"></a>处理accept返回前连接终止</h3><p>如下图的情况的时候,</p>
+<p><a href="https://img2018.cnblogs.com/blog/1943986/202002/1943986-20200218135741884-638091161.png" target="_blank" rel="noopener"><img src="https://img2018.cnblogs.com/blog/1943986/202002/1943986-20200218135741884-638091161.png" alt="img"></a></p>
+<p>如何处理这种问题依赖于不同的实现, 之后再说</p>
+<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>  所有客户端和服务器都从调用socket开始, 客户端connect, 服务端bind, listen和accept, 大多数TCP都是并发的, 而大多数UDP却是迭代的</p>
+<h2 id="IO复用-–-select-和-poll"><a href="#IO复用-–-select-和-poll" class="headerlink" title="IO复用 – select 和 poll"></a>IO复用 – select 和 poll</h2><p>- 当用户处理多个 描述符, 必须使用IO复用</p>
+<p>- 如果一个TCP服务器, 既要处理监听的套接字, 又要处理连接的套接字, 就要使用IO复用</p>
+<p>- 如果又要TCP, 又要UDP, 就要IO复用</p>
+<p>- 如果一个服务器要处理多个服务器和多个协议, 通常要IO复用(例如inetd守护进程)</p>
+<p>IO复用并非只局限于网络编程, 许多重要的应用也要采用这个技术</p>
+<h3 id="IO模型"><a href="#IO模型" class="headerlink" title="IO模型"></a>IO模型</h3><p>在了解IO复用之前需要先回顾unix的5种IO模型: 阻塞式, 非阻塞式, 复用, 信号驱动IO, 异步IO</p>
+<p>其中</p>
+<p><strong>非阻塞IO</strong></p>
+<p> 非阻塞IO是指当所请求的IO非得把本进程投入睡眠才能完成时不要睡眠, 而是返回一个错误</p>
+<p>5种模型的比较</p>
+<p><a href="https://img2018.cnblogs.com/blog/1943986/202002/1943986-20200220171334267-15911015.png" target="_blank" rel="noopener"><img src="https://img2018.cnblogs.com/blog/1943986/202002/1943986-20200220171334267-15911015.png" alt="img"></a></p>
+<p>5种模型的比较</p>
+<h3 id="select-函数"><a href="#select-函数" class="headerlink" title="select 函数"></a>select 函数</h3><p>该函数select一个’内核等待’发生, 并且只有在一个或多个事件发生(或经历了一段时间后)才唤醒它</p>
+<p>举个例子, 比如我们可以通过调用<code>select</code>函数使得内核仅在以下情况返回:</p>
+<ul>
+<li><p>{1, 4, 5}描述符准备好读</p>
+</li>
+<li><p>{2, 7}准备好写</p>
+</li>
+<li><p>{1, 4}有异常条件待处理</p>
+</li>
+<li><p>已经经历了10.2秒</p>
+</li>
+</ul>
+<p>- <strong>运用IO复用技术解决前面提到过的问题</strong></p>
+<p> 之前遇到的问题是: 当套接字上发生了某种事件的时候, 客户可能阻塞于fgets调用. 现在将其改为阻塞于select调用,</p>
+ <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">str_cli</span><span class="params">(FILE *fp, <span class="keyword">int</span> sockfd)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">int</span> maxfdp1;</span><br><span class="line"></span><br><span class="line">  fd_set rset;</span><br><span class="line">  <span class="keyword">char</span> sendline[MAXLINE], recvline[MAXLINE];</span><br><span class="line"></span><br><span class="line">  FD_ZERO(&amp;rset);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">while</span>(<span class="literal">true</span>) &#123;</span><br><span class="line"></span><br><span class="line">    FD_SET(fileno(fp), &amp;rset); <span class="comment">// 每一次都要初始化</span></span><br><span class="line">    FD_SET(sockfd, &amp;rset);<span class="comment">// 每一次都要初始化</span></span><br><span class="line">    maxfdp1 = max(fileno(fp), sockfd) + <span class="number">1</span>;</span><br><span class="line">    select(maxfdp1, &amp;rset, <span class="literal">NULL</span>, <span class="literal">NULL</span>, <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(FD_ISSET(sockfd, &amp;rset)) &#123;</span><br><span class="line">     <span class="keyword">if</span>(readline(sockfd, recvline, MAXLINE))</span><br><span class="line">     	   print(<span class="string">"server terminated permaturely"</span>);</span><br><span class="line">       <span class="built_in">fputs</span>(recvline, <span class="built_in">stdout</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(FD_ISSET(fileno(fp), &amp;rset)) &#123;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span>(fgets(sendline, MAXLINE, fp) == <span class="literal">NULL</span>)</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">      write(sockfd, sendline, <span class="built_in">strlen</span>(sendline));</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p> 可是, 即使做了这个修改, 代码仍然存在问题</p>
+<ol>
+<li><p>因为只读取一行stdio的缓存中可能还有额外的输入行待消费</p>
+</li>
+<li><p>一个读到EOF不代表另一个已经读完毕, 不呢个直接return</p>
+</li>
+</ol>
+<ul>
+<li><strong>解决上述问题的版本</strong></li>
+</ul>
+ <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">str_cli2</span><span class="params">(FILE * fp, <span class="keyword">int</span> sockfd)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">int</span> maxfdp1;</span><br><span class="line">  <span class="keyword">bool</span> stdineof;</span><br><span class="line">  fd_set rset;</span><br><span class="line">  <span class="keyword">char</span> buf[MAXLINE];</span><br><span class="line"></span><br><span class="line">  <span class="keyword">int</span> n;</span><br><span class="line">  stdineof = <span class="literal">false</span>;</span><br><span class="line">  FD_ZERO(&amp;rset);</span><br><span class="line"><span class="keyword">while</span>(<span class="literal">true</span>) </span><br><span class="line">&#123;</span><br><span class="line">         <span class="keyword">if</span>(!stdineof)</span><br><span class="line">             FD_SET(fileno(fp), &amp;rset);</span><br><span class="line">         FD_SET(sockfd, &amp;rset);</span><br><span class="line">         maxfdp1 = <span class="built_in">max</span>(fileno(fp), sockfd) + <span class="number">1</span>;</span><br><span class="line">         select(maxfdp1, &amp;rset, <span class="literal">NULL</span>, <span class="literal">NULL</span>, <span class="literal">NULL</span>);</span><br><span class="line"> </span><br><span class="line">         <span class="keyword">if</span>(FD_ISSET(sockfd, &amp;rset))  &#123; <span class="comment">// socket is readable</span></span><br><span class="line">             <span class="keyword">if</span>((n = <span class="built_in">read</span>(sockfd, buf, MAXLINE)) == <span class="number">0</span>)</span><br><span class="line">             &#123;</span><br><span class="line">                 <span class="keyword">if</span>(stdineof)</span><br><span class="line">                     <span class="keyword">return</span>;</span><br><span class="line">                 <span class="keyword">else</span></span><br><span class="line">                     <span class="built_in">print</span>(<span class="string">"server terminated permaturely"</span>);</span><br><span class="line">             &#125;</span><br><span class="line">             <span class="built_in">write</span>(fileno(<span class="built_in">stdout</span>), buf, n);</span><br><span class="line">         &#125;</span><br><span class="line">         <span class="keyword">if</span>(FD_ISSET(filenofp), &amp;rset)) </span><br><span class="line">         &#123;</span><br><span class="line">             <span class="keyword">if</span>((n = <span class="built_in">read</span>(fileno(fp), buf, MAXLINE)) == <span class="number">0</span>)&#123;</span><br><span class="line">                 stdineof = <span class="literal">true</span>;</span><br><span class="line">                 <span class="built_in">shutdown</span>(sockfd, SHUT_WR);</span><br><span class="line">                 FD_CLR(fileno(fp), &amp;rset);</span><br><span class="line">                 <span class="keyword">continue</span>;</span><br><span class="line">             &#125;</span><br><span class="line">         &#125;</span><br><span class="line">     &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p> <strong>注</strong>: 用<code>shutdown(sockfd, SHUT_WR);</code> 发送FIN</p>
+<h4 id="pselect函数"><a href="#pselect函数" class="headerlink" title="pselect函数"></a>pselect函数</h4><p>POSIX发明的, 有许多的unix变种支持他</p>
+<ul>
+<li><p>用timespec结构而不是timeval</p>
+</li>
+<li><p>增加一个指向信号的掩码的指针, 该参数允许程先序禁止递交某些信号, 再测试它们(这些信号)的handler设置的全局变量, 然后调用<code>pselect</code> (也就是暂时更换’信号掩码’, 例如解除某个信号的阻塞)</p>
+</li>
+</ul>
+<h3 id="poll函数"><a href="#poll函数" class="headerlink" title="poll函数"></a>poll函数</h3><p>poll和select类似, 只不过在处理流函数的时候能够提供额外的信息, 先不扯太多理论, 直接看代码还好懂</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"unp.h"</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;limits.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> OPEN_MAX 10</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  	<span class="keyword">int</span> i, maxi, listenfd, connfd, sockfd;</span><br><span class="line">  	<span class="keyword">int</span> nready;</span><br><span class="line">  	<span class="keyword">ssize_t</span> n;</span><br><span class="line"></span><br><span class="line">  	<span class="keyword">char</span> buf[MAXLINE];</span><br><span class="line"></span><br><span class="line">  	<span class="keyword">socklen_t</span> clilen;</span><br><span class="line">  	<span class="class"><span class="keyword">struct</span> <span class="title">pollfd</span> <span class="title">client</span>[<span class="title">OPEN_MAX</span>];</span></span><br><span class="line">  	<span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> <span class="title">cliaddr</span>, <span class="title">servaddr</span>;</span></span><br><span class="line"></span><br><span class="line">  	listenfd = socket(AF_INET, SOCK_STREAM, <span class="number">0</span>);</span><br><span class="line">  	servaddr = makeAddr(<span class="string">"127.0.0.1"</span>, <span class="number">9988</span>);</span><br><span class="line"></span><br><span class="line">  	bind(listenfd, (sockaddr*)&amp;servaddr, <span class="keyword">sizeof</span>(servaddr));</span><br><span class="line">  	listen(listenfd, <span class="number">64</span>);</span><br><span class="line"></span><br><span class="line">  	<span class="comment">// initialize client array</span></span><br><span class="line">  	client[<span class="number">0</span>].fd   = listenfd;</span><br><span class="line">  	client[<span class="number">0</span>].events = POLLRDNORM;</span><br><span class="line">  	<span class="keyword">for</span>(i = <span class="number">1</span>; i &lt; OPEN_MAX; ++i)</span><br><span class="line">  	&#123;</span><br><span class="line">    	client[i].fd = <span class="number">-1</span>;</span><br><span class="line">  	&#125;</span><br><span class="line">  	maxi = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">while</span> (<span class="literal">true</span>) </span><br><span class="line">    &#123;</span><br><span class="line">        nready = poll(client, maxi + <span class="number">1</span>, <span class="number">0x3f3f3f3f</span>);  <span class="comment">// forever</span></span><br><span class="line">     <span class="comment">// 分两部分处理, client[0]是用来放监听socket的, 这个if通过说明可以accept</span></span><br><span class="line">        <span class="keyword">if</span> (client[<span class="number">0</span>].revents &amp;&amp; POLLRDNORM)</span><br><span class="line">        &#123;</span><br><span class="line">            clilen = <span class="keyword">sizeof</span>(cliaddr);</span><br><span class="line">            connfd = accept(listenfd, (struct sockaddr*)&amp;cliaddr,&amp;clilen);</span><br><span class="line"></span><br><span class="line">            <span class="comment">/* insert to the client list */</span></span><br><span class="line">            <span class="keyword">for</span> (i = <span class="number">1</span>; i &lt; OPEN_MAX; ++i)</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">if</span> (client[i].fd &lt; <span class="number">0</span>) </span><br><span class="line">                &#123;</span><br><span class="line">                    client[i].fd = connfd;</span><br><span class="line">                    client[i].events = POLLRDNORM;  <span class="comment">// read normal: 普通数据可读</span></span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            	<span class="keyword">if</span> (i == OPEN_MAX)</span><br><span class="line">               		 err_quit(<span class="string">"too many clients"</span>);</span><br><span class="line"></span><br><span class="line">            	<span class="keyword">if</span> (i &gt; maxi)</span><br><span class="line">                	maxi = i;</span><br><span class="line">            	<span class="keyword">if</span> (--nready &lt;= <span class="number">0</span>)</span><br><span class="line">                	<span class="keyword">continue</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//别的都是client socket</span></span><br><span class="line">        <span class="keyword">for</span> (i = <span class="number">1</span>; i &lt;= maxi; ++i) </span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span> ((sockfd = client[i].fd) &lt; <span class="number">0</span>)</span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">            <span class="keyword">if</span> (client[i].revents &amp;&amp; (POLLRDNORM | POLLERR)) </span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">if</span> ((n = read(sockfd, buf, MAXLINE)) &lt; <span class="number">0</span>) </span><br><span class="line">                &#123;</span><br><span class="line">                    <span class="keyword">if</span> (errno == ECONNRESET)</span><br><span class="line">                    &#123;</span><br><span class="line">                        close(sockfd);</span><br><span class="line">                        client[i].fd = <span class="number">-1</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">else</span></span><br><span class="line">                    &#123;</span><br><span class="line">                         perror(<span class="string">"read error"</span>);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">else</span> <span class="keyword">if</span> (n == <span class="number">0</span>)</span><br><span class="line">                &#123;</span><br><span class="line">                    close(sockfd);</span><br><span class="line">                    client[i].fd = <span class="number">-1</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">else</span></span><br><span class="line">                &#123;</span><br><span class="line">                     write(sockfd, buf, n);</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span> (--nready &lt;= <span class="number">0</span>)</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="套接字选项"><a href="#套接字选项" class="headerlink" title="套接字选项"></a>套接字选项</h3><p>有很多方式来设置和影响套接字选项, 例如<code>getsockopt</code>, <code>setsockopt</code>, <code>fcntl</code>, <code>ioctl</code>,关于传输层的套接字选项, 请自行google或参考有关文档和书籍</p>
+<h2 id="UDP编程"><a href="#UDP编程" class="headerlink" title="UDP编程"></a>UDP编程</h2><p><a href="https://img2018.cnblogs.com/blog/1943986/202002/1943986-20200220171402749-1733523648.png" target="_blank" rel="noopener"><img src="https://img2018.cnblogs.com/blog/1943986/202002/1943986-20200220171402749-1733523648.png" alt="img"></a></p>
+<p>UDP编程模型</p>
+<p>创建socket的时候要把SOCK_STREAM改成SOCK_DGRAM</p>
+<h3 id="recvfrom-和-sendto函数"><a href="#recvfrom-和-sendto函数" class="headerlink" title="recvfrom 和 sendto函数"></a>recvfrom 和 sendto函数</h3><p>类似与标准的read和write, 不过需要3个额外的参数: flags, from, addrlen, flags参数先不说, 暂时把他当成0, 后续会解释; from和addrlen参数和accept的最后两个参数类似</p>
+<p>-<strong>注</strong>: 如果from是一个空指针, 那么addrlen也一样要是一个空指针, 表示我们不关心地址.</p>
+<blockquote>
+<p>`<strong>recvfrom</strong>和<strong>sendto</strong>都可以用于TCP, 尽管通常没有理由那么做*</p>
+</blockquote>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">dg_echo</span><span class="params">(<span class="keyword">int</span> sockfd, SA* pcliaddr, <span class="keyword">socklen_t</span> clilen)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">int</span>    n;</span><br><span class="line">  <span class="keyword">socklen_t</span> len;</span><br><span class="line">  <span class="keyword">char</span>   mesg[MAXLINE];</span><br><span class="line">  <span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">	<span class="comment">// `len` should be initialized to the size of the*</span></span><br><span class="line">	len = clilen;</span><br><span class="line">	n = recvfrom(sockfd, mesg, MAXLINE, <span class="number">0</span>, pcliaddr, &amp;len);</span><br><span class="line">    sendto(sockfd, mesg, <span class="number">0</span>, pcliaddr, len);</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">int</span> sockfd;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">sockaddr_in</span> <span class="title">servaddr</span>, <span class="title">cliaddr</span>;</span></span><br><span class="line">  sockfd  = socket(AF_INET, SOCK_DGRAM, <span class="number">0</span>);</span><br><span class="line">  servaddr = makeAddr(<span class="string">"127.0.0.1"</span>, <span class="number">6666</span>);</span><br><span class="line">  bind(sockfd, (struct sockaddr*)&amp;servaddr, <span class="keyword">sizeof</span>(servaddr));</span><br><span class="line">  dg_echo(sockfd, (SA*)&amp;cliaddr, <span class="keyword">sizeof</span>(cliaddr));</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>代码虽简单, 但是有几个细节需要注意</p>
+<ul>
+<li><p>首先, 函数永不终止, 因为UDP是一个无连接的协议, 它没有像TCP中的EOF之类的东西</p>
+</li>
+<li><p>这是一个迭代服务器, 不像TCP服务器那样可以提供一个并发的服务器, 其中没有fork的调用,因此单个进程就得处理所有客户</p>
+</li>
+<li><p>对于本套接字, UDP层有排队发生, 事实上每个UDPsocket都有一个接收缓存区</p>
+</li>
+</ul>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/%E7%BD%91%E7%BB%9C/" rel="tag"># 网络</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/07/13/TCP%E4%B8%AD%E7%9A%84Sequence/" rel="next" title="TCP 中的Sequence Number">
+                <i class="fa fa-chevron-left"></i> TCP 中的Sequence Number
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.gif"
+               alt="zhangyxin" />
+          <p class="site-author-name" itemprop="name">zhangyxin</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">标签</span>
+              
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#传输层部分知识点"><span class="nav-number">1.</span> <span class="nav-text">传输层部分知识点</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#TIME-WAIT状态"><span class="nav-number">1.1.</span> <span class="nav-text">TIME_WAIT状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SCTP"><span class="nav-number">1.2.</span> <span class="nav-text">SCTP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#函数细节补充"><span class="nav-number">1.3.</span> <span class="nav-text">函数细节补充</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#并发服务器的一个细节"><span class="nav-number">1.4.</span> <span class="nav-text">并发服务器的一个细节</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#处理被中断的系统调用"><span class="nav-number">1.5.</span> <span class="nav-text">处理被中断的系统调用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#处理accept返回前连接终止"><span class="nav-number">1.6.</span> <span class="nav-text">处理accept返回前连接终止</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#小结"><span class="nav-number">1.7.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IO复用-–-select-和-poll"><span class="nav-number">2.</span> <span class="nav-text">IO复用 – select 和 poll</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#IO模型"><span class="nav-number">2.1.</span> <span class="nav-text">IO模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#select-函数"><span class="nav-number">2.2.</span> <span class="nav-text">select 函数</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#pselect函数"><span class="nav-number">2.2.1.</span> <span class="nav-text">pselect函数</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#poll函数"><span class="nav-number">2.3.</span> <span class="nav-text">poll函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#套接字选项"><span class="nav-number">2.4.</span> <span class="nav-text">套接字选项</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#UDP编程"><span class="nav-number">3.</span> <span class="nav-text">UDP编程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#recvfrom-和-sendto函数"><span class="nav-number">3.1.</span> <span class="nav-text">recvfrom 和 sendto函数</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zhangyxin</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io" target="_blank" rel="noopener">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next" target="_blank" rel="noopener">
+    NexT.Muse
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+  
+  <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
